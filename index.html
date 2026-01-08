@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zaky Alifian My - My Design Production | Portfolio</title>
+    <meta name="description" content="Portfolio desain grafis profesional oleh Zaky Alifian My. Spesialisasi: Banner, Pamflet, Logo, Poster dengan CorelDRAW, Canva, dan Pixellab.">
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { Upload, X, Trash2, Plus, Award, Lock, LogOut, Eye, EyeOff } = lucide;
+
+        function Portfolio() {
+            const [projects, setProjects] = useState([]);
+            const [showUploadModal, setShowUploadModal] = useState(false);
+            const [selectedCategory, setSelectedCategory] = useState('semua');
+            const [activeSection, setActiveSection] = useState('home');
+            const [isAdmin, setIsAdmin] = useState(false);
+            const [showLoginModal, setShowLoginModal] = useState(false);
+            const [loginPassword, setLoginPassword] = useState('');
+            const [showPassword, setShowPassword] = useState(false);
+            const [adminPassword, setAdminPassword] = useState('admin123');
+            const [newProject, setNewProject] = useState({
+                title: '', category: 'banner', description: '', image: ''
+            });
+
+            useEffect(() => {
+                loadProjects();
+                checkAdminSession();
+            }, []);
+
+            const checkAdminSession = () => {
+                const session = sessionStorage.getItem('mdp-admin-session');
+                if (session === 'active') setIsAdmin(true);
+            };
+
+            const loadProjects = () => {
+                const saved = localStorage.getItem('mdp-projects');
+                if (saved) setProjects(JSON.parse(saved));
+            };
+
+            const saveProjects = (updatedProjects) => {
+                localStorage.setItem('mdp-projects', JSON.stringify(updatedProjects));
+                setProjects(updatedProjects);
+            };
+
+            const handleLogin = () => {
+                if (loginPassword === adminPassword) {
+                    setIsAdmin(true);
+                    sessionStorage.setItem('mdp-admin-session', 'active');
+                    setShowLoginModal(false);
+                    setLoginPassword('');
+                    alert('Login berhasil! Sekarang Anda bisa upload dan edit portfolio.');
+                } else {
+                    alert('Password salah!');
+                }
+            };
+
+            const handleLogout = () => {
+                setIsAdmin(false);
+                sessionStorage.removeItem('mdp-admin-session');
+                alert('Anda telah logout dari mode admin');
+            };
+
+            const handleImageUpload = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    if (file.size > 5000000) {
+                        alert('Ukuran file terlalu besar. Maksimal 5MB');
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        setNewProject({ ...newProject, image: reader.result });
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            const handleAddProject = () => {
+                if (!newProject.title || !newProject.image) {
+                    alert('Mohon isi judul dan upload gambar');
+                    return;
+                }
+                const project = {
+                    id: Date.now(),
+                    ...newProject,
+                    createdAt: new Date().toISOString()
+                };
+                saveProjects([project, ...projects]);
+                setNewProject({ title: '', category: 'banner', description: '', image: '' });
+                setShowUploadModal(false);
+            };
+
+            const handleDeleteProject = (id) => {
+                if (confirm('Yakin ingin menghapus karya ini?')) {
+                    saveProjects(projects.filter(p => p.id !== id));
+                }
+            };
+
+            const categories = [
+                { value: 'semua', label: 'Semua' },
+                { value: 'banner', label: 'Banner' },
+                { value: 'pamflet', label: 'Pamflet' },
+                { value: 'logo', label: 'Logo' },
+                { value: 'poster', label: 'Poster' },
+                { value: 'lainnya', label: 'Lainnya' }
+            ];
+
+            const filteredProjects = selectedCategory === 'semua' 
+                ? projects 
+                : projects.filter(p => p.category === selectedCategory);
+
+            const tools = [
+                { name: 'CorelDRAW', level: 90 },
+                { name: 'Canva', level: 85 },
+                { name: 'Pixellab', level: 80 }
+            ];
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+                    {/* Navigation */}
+                    <nav className="fixed top-0 w-full bg-black/40 backdrop-blur-lg border-b border-white/10 z-40">
+                        <div className="container mx-auto px-4">
+                            <div className="flex items-center justify-between h-20">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center font-bold text-white text-xl">MD</div>
+                                    <div>
+                                        <h1 className="text-white font-bold text-xl">My Design Production</h1>
+                                        <p className="text-purple-300 text-sm">Creative Design Studio</p>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex items-center gap-4">
+                                    <div className="hidden md:flex gap-6">
+                                        <button onClick={() => setActiveSection('home')} className={`text-white hover:text-purple-400 transition-colors ${activeSection === 'home' ? 'text-purple-400 font-semibold' : ''}`}>Home</button>
+                                        <button onClick={() => setActiveSection('about')} className={`text-white hover:text-purple-400 transition-colors ${activeSection === 'about' ? 'text-purple-400 font-semibold' : ''}`}>About Me</button>
+                                        <button onClick={() => setActiveSection('portfolio')} className={`text-white hover:text-purple-400 transition-colors ${activeSection === 'portfolio' ? 'text-purple-400 font-semibold' : ''}`}>Portfolio</button>
+                                    </div>
+                                    
+                                    {isAdmin ? (
+                                        <div className="flex items-center gap-3">
+                                            <button onClick={() => setShowUploadModal(true)} className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all text-sm">
+                                                <span>+</span> Upload
+                                            </button>
+                                            <button onClick={handleLogout} className="flex items-center gap-2 bg-red-500/20 text-red-300 px-4 py-2 rounded-lg hover:bg-red-500/30 transition-all text-sm border border-red-500/30">Logout</button>
+                                            <span className="text-green-400 text-xs bg-green-500/20 px-3 py-1 rounded-full border border-green-500/30">Admin Mode</span>
+                                        </div>
+                                    ) : (
+                                        <button onClick={() => setShowLoginModal(true)} className="flex items-center gap-2 bg-white/10 text-white px-4 py-2 rounded-lg hover:bg-white/20 transition-all text-sm border border-white/20">🔒 Admin Login</button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <div className="pt-20">
+                        {/* Hero Section */}
+                        {activeSection === 'home' && (
+                            <section className="min-h-screen flex items-center justify-center px-4">
+                                <div className="text-center max-w-4xl mx-auto">
+                                    <div className="mb-8 relative inline-block">
+                                        <div className="w-40 h-40 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white text-6xl font-bold mx-auto shadow-2xl shadow-purple-500/50">ZA</div>
+                                    </div>
+                                    <h1 className="text-6xl md:text-7xl font-bold text-white mb-4">Zaky Alifian My</h1>
+                                    <p className="text-3xl text-purple-300 mb-6 font-light">Graphic Designer</p>
+                                    <div className="inline-block bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full border border-white/20 mb-8">
+                                        <p className="text-white text-lg">My Design Production</p>
+                                    </div>
+                                    <p className="text-xl text-white/80 mb-12 max-w-2xl mx-auto leading-relaxed">Menciptakan desain visual yang menarik dan profesional untuk berbagai kebutuhan bisnis dan personal</p>
+                                    <div className="flex gap-4 justify-center">
+                                        <button onClick={() => setActiveSection('portfolio')} className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-purple-500/50">Lihat Portfolio</button>
+                                        <button onClick={() => setActiveSection('about')} className="bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white/20 transition-all border border-white/20">About Me</button>
+                                    </div>
+                                </div>
+                            </section>
+                        )}
+
+                        {/* About Section */}
+                        {activeSection === 'about' && (
+                            <section className="min-h-screen py-20 px-4">
+                                <div className="container mx-auto max-w-5xl">
+                                    <h2 className="text-5xl font-bold text-white text-center mb-4">About Me</h2>
+                                    <div className="w-24 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto mb-16"></div>
+                                    <div className="grid md:grid-cols-2 gap-12">
+                                        <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+                                            <div className="w-32 h-32 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white text-5xl font-bold mx-auto mb-6 shadow-xl">ZA</div>
+                                            <h3 className="text-3xl font-bold text-white text-center mb-2">Zaky Alifian My</h3>
+                                            <p className="text-purple-300 text-center text-lg mb-6">Professional Graphic Designer</p>
+                                            <div className="bg-purple-500/10 rounded-lg p-4 text-center border border-purple-500/20">
+                                                <p className="text-white font-semibold">My Design Production</p>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-8">
+                                            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+                                                <h4 className="text-2xl font-bold text-white mb-4">Tentang Saya</h4>
+                                                <p className="text-white/80 leading-relaxed mb-4">Saya adalah seorang desainer grafis profesional dengan passion dalam menciptakan desain visual yang menarik dan efektif. Dengan pengalaman menggunakan berbagai tools desain modern, saya siap membantu mewujudkan visi kreatif Anda.</p>
+                                                <p className="text-white/80 leading-relaxed">Spesialisasi saya meliputi pembuatan banner, pamflet, logo, poster, dan berbagai materi promosi visual lainnya yang dirancang untuk meningkatkan brand awareness dan engagement.</p>
+                                            </div>
+                                            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+                                                <h4 className="text-2xl font-bold text-white mb-6">Design Tools</h4>
+                                                <div className="space-y-5">
+                                                    {tools.map((tool, idx) => (
+                                                        <div key={idx}>
+                                                            <div className="flex justify-between mb-2">
+                                                                <span className="text-white font-medium">{tool.name}</span>
+                                                                <span className="text-purple-300">{tool.level}%</span>
+                                                            </div>
+                                                            <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden">
+                                                                <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full" style={{width: `${tool.level}%`}}></div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        )}
+
+                        {/* Portfolio Section */}
+                        {activeSection === 'portfolio' && (
+                            <section className="min-h-screen py-20 px-4">
+                                <div className="container mx-auto">
+                                    <h2 className="text-5xl font-bold text-white text-center mb-4">Portfolio</h2>
+                                    <div className="w-24 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto mb-12"></div>
+                                    <div className="flex flex-wrap gap-3 justify-center mb-12">
+                                        {categories.map(cat => (
+                                            <button key={cat.value} onClick={() => setSelectedCategory(cat.value)} className={`px-6 py-3 rounded-full transition-all ${selectedCategory === cat.value ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg' : 'bg-white/10 text-white hover:bg-white/20'}`}>{cat.label}</button>
+                                        ))}
+                                    </div>
+                                    {filteredProjects.length === 0 ? (
+                                        <div className="text-center py-20">
+                                            <p className="text-white/50 text-lg mb-4">{selectedCategory === 'semua' ? 'Belum ada karya dipublikasikan.' : `Belum ada karya di kategori ${categories.find(c => c.value === selectedCategory)?.label}`}</p>
+                                            {isAdmin && <button onClick={() => setShowUploadModal(true)} className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg">Upload Karya Sekarang</button>}
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                            {filteredProjects.map(project => (
+                                                <div key={project.id} className="group relative bg-white/5 backdrop-blur-sm rounded-xl overflow-hidden border border-white/10 hover:border-purple-500/50 transition-all hover:shadow-2xl hover:shadow-purple-500/20">
+                                                    <div className="aspect-video bg-black/20 overflow-hidden">
+                                                        <img src={project.image} alt={project.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                                    </div>
+                                                    <div className="p-5">
+                                                        <div className="flex items-start justify-between mb-2">
+                                                            <div className="flex-1">
+                                                                <h3 className="text-white font-semibold text-lg mb-1">{project.title}</h3>
+                                                                <span className="inline-block px-3 py-1 bg-purple-500/20 text-purple-300 text-xs rounded-full">{categories.find(c => c.value === project.category)?.label}</span>
+                                                            </div>
+                                                            {isAdmin && <button onClick={() => handleDeleteProject(project.id)} className="text-red-400 hover:text-red-300 transition-colors p-2">🗑️</button>}
+                                                        </div>
+                                                        {project.description && <p className="text-white/70 text-sm mt-3">{project.description}</p>}
+                                                        <p className="text-white/40 text-xs mt-3">{new Date(project.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </section>
+                        )}
+                    </div>
+
+                    {/* Footer */}
+                    <footer className="bg-black/40 backdrop-blur-lg border-t border-white/10 py-8">
+                        <div className="container mx-auto px-4 text-center">
+                            <div className="flex items-center justify-center gap-2 mb-4">
+                                <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center font-bold text-white text-sm">MD</div>
+                                <span className="text-white font-semibold">My Design Production</span>
+                            </div>
+                            <p className="text-white/60">© 2026 Zaky Alifian My. All Rights Reserved.</p>
+                        </div>
+                    </footer>
+
+                    {/* Login Modal */}
+                    {showLoginModal && (
+                        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                            <div className="bg-slate-800 rounded-2xl max-w-md w-full p-8 border border-white/10">
+                                <div className="flex items-center justify-center mb-6">
+                                    <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-3xl">🔒</div>
+                                </div>
+                                <h2 className="text-2xl font-bold text-white text-center mb-2">Admin Login</h2>
+                                <p className="text-white/60 text-center mb-6">Masukkan password untuk mengelola portfolio</p>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-white mb-2 font-medium">Password</label>
+                                        <div className="relative">
+                                            <input type={showPassword ? "text" : "password"} value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleLogin()} className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 pr-12" placeholder="Masukkan password admin" />
+                                            <button onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white">{showPassword ? '👁️' : '👁️‍🗨️'}</button>
+                                        </div>
+                                        <p className="text-purple-300 text-xs mt-2">Password default: <code className="bg-purple-500/20 px-2 py-1 rounded">admin123</code></p>
+                                    </div>
+                                    <div className="flex gap-3 pt-4">
+                                        <button onClick={() => { setShowLoginModal(false); setLoginPassword(''); }} className="flex-1 px-4 py-3 bg-white/5 text-white rounded-lg hover:bg-white/10 transition-colors">Batal</button>
+                                        <button onClick={handleLogin} className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg">Login</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Upload Modal */}
+                    {showUploadModal && isAdmin && (
+                        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                            <div className="bg-slate-800 rounded-2xl max-w-md w-full p-6 border border-white/10 max-h-[90vh] overflow-y-auto">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h2 className="text-2xl font-bold text-white">Upload Karya Baru</h2>
+                                    <button onClick={() => setShowUploadModal(false)} className="text-white/50 hover:text-white text-2xl">×</button>
+                                </div>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-white mb-2 font-medium">Judul Karya *</label>
+                                        <input type="text" value={newProject.title} onChange={(e) => setNewProject({...newProject, title: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500" placeholder="Contoh: Banner Promosi Lebaran" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-white mb-2 font-medium">Kategori *</label>
+                                        <select value={newProject.category} onChange={(e) => setNewProject({...newProject, category: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500">
+                                            {categories.filter(c => c.value !== 'semua').map(cat => (
+                                                <option key={cat.value} value={cat.value}>{cat.label}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-white mb-2 font-medium">Deskripsi (opsional)</label>
+                                        <textarea value={newProject.description} onChange={(e) => setNewProject({...newProject, description: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 resize-none" rows="3" placeholder="Ceritakan tentang desain ini..."></textarea>
+                                    </div>
+                                    <div>
+                                        <label className="block text-white mb-2 font-medium">Upload Gambar *</label>
+                                        <input type="file" accept="image/*" onChange={handleImageUpload} id="imageUpload" className="hidden" />
+                                        <label htmlFor="imageUpload" className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-white/20 rounded-lg cursor-pointer hover:border-purple-500 transition-colors bg-white/5">
+                                            {newProject.image ? (
+                                                <img src={newProject.image} alt="Preview" className="w-full h-full object-cover rounded-lg" />
+                                            ) : (
+                                                <>
+                                                    <span className="text-4xl mb-2">📤</span>
+                                                    <span className="text-white/50 text-sm">Klik untuk upload gambar</span>
+                                                    <span className="text-white/30 text-xs mt-1">Max 5MB</span>
+                                                </>
+                                            )}
+                                        </label>
+                                    </div>
+                                    <div className="flex gap-3 pt-4">
+                                        <button onClick={() => setShowUploadModal(false)} className="flex-1 px-4 py-3 bg-white/5 text-white rounded-lg hover:bg-white/10 transition-colors">Batal</button>
+                                        <button onClick={handleAddProject} className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg">Upload</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<Portfolio />, document.getElementById('root'));
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>
